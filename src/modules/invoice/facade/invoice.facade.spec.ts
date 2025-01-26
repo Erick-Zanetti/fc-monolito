@@ -3,9 +3,6 @@ import InvoiceItemModel from "../repository/invoice-item.model";
 import InvoiceModel from "../repository/invoice.model";
 import InvoiceFacadeFactory from "../factory/invoice.facade.factory";
 import { FindInvoiceFacadeInputDto, GenerateInvoiceFacadeInputDto } from "./facade.interface";
-import InvoiceRepository from "../repository/invoice.repository";
-import GenerateInvoiceUseCase from "../usecase/generate-invoice/generate-invoice.usecase";
-import InvoiceFacade from "./invoice.facade";
 
 describe("InvoiceFacade test", () => {
     let sequelize: Sequelize;
@@ -51,9 +48,7 @@ describe("InvoiceFacade test", () => {
             ]
         }
 
-        await facade.generate(input);
-
-        const invoice = await InvoiceModel.findOne({include: [{ model: InvoiceItemModel }] });
+        const invoice = await facade.generate(input);
 
         expect(invoice).toBeDefined();
         expect(invoice?.name).toBe(input.name);
