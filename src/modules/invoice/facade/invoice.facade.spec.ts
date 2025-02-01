@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize-typescript";
 import InvoiceItemModel from "../repository/invoice-item.model";
 import InvoiceModel from "../repository/invoice.model";
 import InvoiceFacadeFactory from "../factory/invoice.facade.factory";
-import { FindInvoiceFacadeInputDto, GenerateInvoiceFacadeInputDto } from "./facade.interface";
+import { FindInvoiceFacadeInputDto, GenerateInvoiceFacadeInputDto } from "./invoice.facade.interface";
 
 describe("InvoiceFacade test", () => {
     let sequelize: Sequelize;

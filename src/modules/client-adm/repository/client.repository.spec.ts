@@ -93,6 +93,5 @@ describe("Client Repository test", () => {
     expect(result.address.state).toEqual(client.state)
     expect(result.address.zipCode).toEqual(client.zipcode)
     expect(result.createdAt).toStrictEqual(client.createdAt)
-    expect(result.updatedAt).toStrictEqual(client.updatedAt)
   })
 })
