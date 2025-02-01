@@ -1,5 +1,6 @@
 import ProductAdmFacadeInterface, {
   AddProductFacadeInputDto,
+  AddProductFacadeOutputDto,
   CheckStockFacadeInputDto,
   CheckStockFacadeOutputDto,
 } from "./product-adm.facade.interface";
@@ -20,10 +21,9 @@ export default class ProductAdmFacade implements ProductAdmFacadeInterface {
     this._checkStockUsecase = usecasesProps.checkStockUseCase;
   }
 
-  async addProduct(input: AddProductFacadeInputDto): Promise<boolean> {
-    // caso o dto do caso de uso for != do dto da facade, converter o dto da facade para o dto do caso de uso
-    await this._addUsecase.execute(input);
-    return true;
+  async addProduct(input: AddProductFacadeInputDto): Promise<AddProductFacadeOutputDto> {
+    const output = await this._addUsecase.execute(input);
+    return output;
   }
   checkStock(
     input: CheckStockFacadeInputDto

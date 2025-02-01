@@ -5,8 +5,7 @@ import { setupDB } from "./database";
 dotenv.config();
 const port: number = Number(process.env.PORT) || 3111;
 
-setupDB();
-
-app.listen(port, () => {
+app.listen(port, async () => {
+  await setupDB();
   console.log(`Server is listening on port ${port}`);
 });

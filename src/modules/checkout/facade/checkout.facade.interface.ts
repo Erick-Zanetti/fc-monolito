@@ -10,6 +10,7 @@ export interface CheckoutFacadeOutputDto {
     id: string;
     total: number;
     status: string;
+    invoiceId?: string;
     createdAt: Date;
     updatedAt: Date;
 }

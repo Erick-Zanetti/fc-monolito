@@ -1,8 +1,9 @@
 import { sequelize } from "./database-sequelize";
 import { migrator } from "./migrator";
 
-function setupDB() {
-  migrator(sequelize);
+async function setupDB() {
+  await migrator(sequelize).up();
+  return sequelize;
 }
 
 export { setupDB };

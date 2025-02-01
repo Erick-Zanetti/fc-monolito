@@ -62,6 +62,7 @@ describe("ProductRepository test", () => {
       name: "Product 1",
       description: "Product 1 description",
       purchasePrice: 100,
+      salesPrice: 200,
       stock: 10,
       createdAt: new Date(),
       updatedAt: new Date(),
