@@ -1,4 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
+import { Umzug } from "umzug";
+import { migrator } from "src/infra/config/database/migrator";
 import InvoiceModel from "./invoice.model";
 import InvoiceItemModel from "./invoice-item.model";
 import InvoiceRepository from "./invoice.repository";
@@ -9,23 +11,30 @@ import InvoiceItem from "../domain/invoice-item.entity";
 
 describe("InvoiceRepository test", () => {
     let sequelize: Sequelize;
-    
+    let migrated: Umzug<Sequelize>;
+  
     beforeEach(async () => {
-        sequelize = new Sequelize({
-            dialect: "sqlite",
-            storage: ":memory:",
-            logging: false,
-            sync: { force: true },
-        });
-        
-        await sequelize.addModels([InvoiceModel, InvoiceItemModel]);
-        await sequelize.sync();
+      sequelize = new Sequelize({
+        dialect: "sqlite",
+        storage: ":memory:",
+        logging: false,
+        models: [
+          InvoiceModel,
+          InvoiceItemModel,
+        ],
+      });
+      migrated = migrator(sequelize);
+      await migrated.up();
     });
-    
+  
     afterEach(async () => {
-        await sequelize.close();
+      if (!migrated || !sequelize) {
+        return 
+      }
+      migrated = migrator(sequelize)
+      await migrated.down()
+      await sequelize.close()
     });
-
     it("should generate an invoice without items", async () => {
         const invoice = new Invoice({
             id: new Id("1"),

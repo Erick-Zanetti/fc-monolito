@@ -1,26 +1,35 @@
 import { Sequelize } from "sequelize-typescript";
+import { Umzug } from "umzug";
+import { migrator } from "src/infra/config/database/migrator";
 import StoreCatalogFacadeFactory from "../factory/facade.factory";
 import ProductModel from "../repository/product.model";
 
 describe("StoreCatalogFacade test", () => {
   let sequelize: Sequelize;
+  let migrated: Umzug<Sequelize>;
 
   beforeEach(async () => {
     sequelize = new Sequelize({
       dialect: "sqlite",
       storage: ":memory:",
       logging: false,
-      sync: { force: true },
+      models: [
+        ProductModel
+      ],
     });
-
-    await sequelize.addModels([ProductModel]);
-    await sequelize.sync();
+    migrated = migrator(sequelize);
+    await migrated.up();
   });
 
   afterEach(async () => {
-    await sequelize.close();
+    if (!migrated || !sequelize) {
+      return 
+    }
+    migrated = migrator(sequelize)
+    await migrated.down()
+    await sequelize.close()
   });
-
+  
   it("should find a product", async () => {
     const facade = StoreCatalogFacadeFactory.create();
     await ProductModel.create({
@@ -29,15 +38,15 @@ describe("StoreCatalogFacade test", () => {
       description: "Description 1",
       salesPrice: 100,
     });
-
+    
     const result = await facade.find({ id: "1" });
-
+    
     expect(result.id).toBe("1");
     expect(result.name).toBe("Product 1");
     expect(result.description).toBe("Description 1");
     expect(result.salesPrice).toBe(100);
   });
-
+  
   it("should find all products", async () => {
     const facade = StoreCatalogFacadeFactory.create();
     await ProductModel.create({
@@ -52,9 +61,9 @@ describe("StoreCatalogFacade test", () => {
       description: "Description 2",
       salesPrice: 200,
     });
-
+    
     const result = await facade.findAll();
-
+    
     expect(result.products.length).toBe(2);
     expect(result.products[0].id).toBe("1");
     expect(result.products[0].name).toBe("Product 1");

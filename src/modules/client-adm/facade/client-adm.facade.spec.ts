@@ -1,4 +1,6 @@
-import { Sequelize } from "sequelize-typescript"
+import { Sequelize } from "sequelize-typescript";
+import { Umzug } from "umzug";
+import { migrator } from "src/infra/config/database/migrator";
 import { ClientModel } from "../repository/client.model"
 import ClientRepository from "../repository/client.repository"
 import AddClientUseCase from "../usecase/add-client/add-client.usecase"
@@ -8,24 +10,30 @@ import Address from "../../@shared/domain/value-object/address"
 
 
 describe("Client Adm Facade test", () => {
-
-  let sequelize: Sequelize
+  let sequelize: Sequelize;
+  let migrated: Umzug<Sequelize>;
 
   beforeEach(async () => {
     sequelize = new Sequelize({
-      dialect: 'sqlite',
-      storage: ':memory:',
+      dialect: "sqlite",
+      storage: ":memory:",
       logging: false,
-      sync: { force: true }
-    })
-
-    sequelize.addModels([ClientModel])
-    await sequelize.sync()
-  })
+      models: [
+        ClientModel,
+      ],
+    });
+    migrated = migrator(sequelize);
+    await migrated.up();
+  });
 
   afterEach(async () => {
+    if (!migrated || !sequelize) {
+      return 
+    }
+    migrated = migrator(sequelize)
+    await migrated.down()
     await sequelize.close()
-  })
+  });
 
   it("should create a client", async () => {
 

@@ -1,26 +1,36 @@
 import { Sequelize } from "sequelize-typescript";
-import InvoiceItemModel from "../repository/invoice-item.model";
-import InvoiceModel from "../repository/invoice.model";
+import { Umzug } from "umzug";
+import { migrator } from "src/infra/config/database/migrator";
 import InvoiceFacadeFactory from "../factory/invoice.facade.factory";
 import { FindInvoiceFacadeInputDto, GenerateInvoiceFacadeInputDto } from "./invoice.facade.interface";
+import InvoiceModel from "../repository/invoice.model";
+import InvoiceItemModel from "../repository/invoice-item.model";
 
 describe("InvoiceFacade test", () => {
     let sequelize: Sequelize;
-
+    let migrated: Umzug<Sequelize>;
+  
     beforeEach(async () => {
       sequelize = new Sequelize({
         dialect: "sqlite",
         storage: ":memory:",
         logging: false,
-        sync: { force: true },
+        models: [
+          InvoiceModel,
+          InvoiceItemModel,
+        ],
       });
-  
-      await sequelize.addModels([InvoiceModel, InvoiceItemModel]);
-      await sequelize.sync();
+      migrated = migrator(sequelize);
+      await migrated.up();
     });
   
     afterEach(async () => {
-      await sequelize.close();
+      if (!migrated || !sequelize) {
+        return 
+      }
+      migrated = migrator(sequelize)
+      await migrated.down()
+      await sequelize.close()
     });
 
     it("should generate an invoice", async () => {

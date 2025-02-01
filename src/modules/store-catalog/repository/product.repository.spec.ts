@@ -1,24 +1,33 @@
 import { Sequelize } from "sequelize-typescript";
+import { Umzug } from "umzug";
+import { migrator } from "src/infra/config/database/migrator";
 import ProductModel from "./product.model";
 import ProductRepository from "./product.repository";
 
 describe("ProductRepository test", () => {
   let sequelize: Sequelize;
+  let migrated: Umzug<Sequelize>;
 
   beforeEach(async () => {
     sequelize = new Sequelize({
       dialect: "sqlite",
       storage: ":memory:",
       logging: false,
-      sync: { force: true },
+      models: [
+        ProductModel
+      ],
     });
-
-    await sequelize.addModels([ProductModel]);
-    await sequelize.sync();
+    migrated = migrator(sequelize);
+    await migrated.up();
   });
 
   afterEach(async () => {
-    await sequelize.close();
+    if (!migrated || !sequelize) {
+      return 
+    }
+    migrated = migrator(sequelize)
+    await migrated.down()
+    await sequelize.close()
   });
 
   it("should find all products", async () => {
@@ -51,12 +60,16 @@ describe("ProductRepository test", () => {
   });
 
   it("should find a product", async () => {
-    await ProductModel.create({
-      id: "1",
-      name: "Product 1",
-      description: "Description 1",
-      salesPrice: 100,
-    });
+    try {
+      await ProductModel.create({
+        id: "1",
+        name: "Product 1",
+        description: "Description 1",
+        salesPrice: 100,
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     const productRepository = new ProductRepository();
     const product = await productRepository.find("1");
